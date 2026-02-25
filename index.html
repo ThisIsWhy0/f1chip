@@ -2,25 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 F1 Fantasy Master Tool</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026 F1 Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --f1-red: #e10600;
+            --ferrari-red: #ff2800;
+            --merc-silver: #00d2be;
             --rb-blue: #061D42;
-            --mcl-papaya: #FF8700;
-            --f1-dark: #15151e;
-            --f1-card: #1f1f27;
-            --text-light: #f0f0f0;
-            --text-dim: #a0a0a0;
+            --mcl-papaya: #ff8700;
+            --dark-bg: #101014;
+            --card-bg: #1f1f27;
+            --text-main: #ffffff;
+            --text-dim: #8a8a95;
+            --accent: #ff2800;
             --success: #2ecc71;
-            --warning: #f1c40f;
+            --alert: #e10600;
         }
 
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
         body {
-            font-family: 'Titillium Web', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--f1-dark);
-            color: var(--text-light);
+            font-family: 'Titillium Web', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-main);
             margin: 0;
             padding: 0;
             display: flex;
@@ -28,264 +33,350 @@
             min-height: 100vh;
         }
 
+        /* --- HEADER & TEAM NAV --- */
         header {
-            background-color: var(--f1-card);
-            padding: 15px;
+            background: linear-gradient(180deg, #1a1a20 0%, #101014 100%);
+            padding: 15px 10px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #333;
+        }
+
+        .app-title {
             text-align: center;
-            border-bottom: 2px solid #333;
-        }
-
-        h1 { margin: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* --- TEAM SELECTOR --- */
-        .team-selector {
-            display: flex;
-            justify-content: center;
-            padding: 15px;
-            background: #000;
-            gap: 10px;
-        }
-
-        .team-btn {
-            background: #333;
+            font-weight: 900;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
             color: #fff;
-            border: 2px solid transparent;
-            padding: 10px 15px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: bold;
-            cursor: pointer;
-            opacity: 0.7;
-            transition: all 0.2s;
         }
 
-        .team-btn.active { opacity: 1; transform: scale(1.05); }
-        .team-btn[data-team="1"].active { background: var(--f1-red); border-color: var(--f1-red); }
-        .team-btn[data-team="2"].active { background: var(--rb-blue); border-color: #3671C6; }
-        .team-btn[data-team="3"].active { background: var(--mcl-papaya); border-color: var(--mcl-papaya); color: #000; }
-
-        .container {
+        .team-nav {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
             max-width: 600px;
             margin: 0 auto;
-            padding: 20px;
-            flex: 1;
-            width: 100%;
-            box-sizing: border-box;
         }
 
-        /* --- WIZARD STYLES --- */
-        .wizard-step { display: none; animation: fadeIn 0.3s ease; }
-        .wizard-step.active { display: block; }
+        .nav-btn {
+            background: #2a2a35;
+            border: none;
+            color: var(--text-dim);
+            padding: 10px 5px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+        }
 
-        .question-card {
-            background-color: var(--f1-card);
+        .nav-btn.active { color: #fff; background: #333; }
+        .nav-btn[data-team="1"].active { border-color: var(--ferrari-red); }
+        .nav-btn[data-team="2"].active { border-color: var(--rb-blue); }
+        .nav-btn[data-team="3"].active { border-color: var(--mcl-papaya); }
+
+        /* --- MAIN CONTENT --- */
+        main {
+            flex: 1;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .team-indicator {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .emergency-btn {
+            background: rgba(225, 6, 0, 0.2);
+            color: var(--alert);
+            border: 1px solid var(--alert);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: pointer;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
+        /* --- WIZARD CARDS --- */
+        .card {
+            background: var(--card-bg);
             border-radius: 12px;
             padding: 25px;
-            border: 1px solid #333;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease-out;
+            border: 1px solid #2a2a35;
         }
 
-        .team-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            margin-bottom: 15px;
-            background: #333;
-            color: #aaa;
-        }
+        .card-header { font-size: 0.8rem; color: var(--accent); font-weight: 700; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; }
+        .question { font-size: 1.4rem; font-weight: 700; margin-bottom: 10px; line-height: 1.2; }
+        .context { font-size: 0.95rem; color: var(--text-dim); margin-bottom: 25px; line-height: 1.5; }
 
-        .question-text { font-size: 1.3rem; margin-bottom: 10px; font-weight: 700; }
-        .question-sub { color: var(--text-dim); font-size: 0.95rem; margin-bottom: 25px; line-height: 1.4; }
-
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 
         .btn {
-            padding: 16px;
+            padding: 18px;
+            border-radius: 10px;
             border: none;
-            border-radius: 8px;
             font-weight: 800;
             font-size: 1rem;
             cursor: pointer;
-            transition: transform 0.1s;
             text-transform: uppercase;
+            transition: transform 0.1s;
         }
-        .btn:active { transform: scale(0.98); }
-        .btn-yes { background-color: var(--success); color: #000; }
-        .btn-no { background-color: #383842; color: white; }
+        .btn:active { transform: scale(0.96); }
         
-        .result-card {
-            background: linear-gradient(145deg, #1f1f27, #25252e);
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
-            border-top: 4px solid var(--success);
-        }
-        .result-icon { font-size: 4rem; display: block; margin-bottom: 10px; }
-        .result-name { font-size: 2rem; font-weight: 900; color: var(--text-light); margin: 10px 0; }
-        .result-desc { color: #ccc; margin-bottom: 20px; line-height: 1.5; }
-        .result-logic { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; text-align: left; font-size: 0.9rem; color: #ddd; border-left: 3px solid var(--text-dim); }
+        .btn-yes { background: #fff; color: #000; }
+        .btn-no { background: #333; color: #fff; }
 
-        .restart-btn {
-            background: transparent;
-            border: 1px solid var(--text-dim);
+        /* --- RESULT SCREEN --- */
+        .result-icon { font-size: 3.5rem; display: block; margin-bottom: 15px; }
+        .result-title { font-size: 1.8rem; font-weight: 900; color: #fff; margin-bottom: 10px; }
+        .result-desc { font-size: 1.1rem; color: #ccc; margin-bottom: 20px; }
+        
+        .strategy-box {
+            background: rgba(0,0,0,0.2);
+            border-left: 4px solid var(--accent);
+            padding: 15px;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .strategy-label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 5px; }
+        .strategy-text { font-size: 0.95rem; color: #fff; }
+
+        .reset-link {
+            display: block;
+            text-align: center;
             color: var(--text-dim);
-            padding: 12px;
-            width: 100%;
-            margin-top: 20px;
-            border-radius: 6px;
+            text-decoration: underline;
+            margin-top: 15px;
+            font-size: 0.9rem;
             cursor: pointer;
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>2026 Strategy Engine</h1>
+    <div class="app-title">F1 2026 StratOS</div>
+    <div class="team-nav">
+        <button class="nav-btn active" data-team="1" onclick="setTeam(1)">Alpha<br><span style="font-size:0.6rem; opacity:0.7">MER / FER</span></button>
+        <button class="nav-btn" data-team="2" onclick="setTeam(2)">RB Hedge<br><span style="font-size:0.6rem; opacity:0.7">VER / RB</span></button>
+        <button class="nav-btn" data-team="3" onclick="setTeam(3)">McLaren<br><span style="font-size:0.6rem; opacity:0.7">NOR / MCL</span></button>
+    </div>
 </header>
 
-<div class="team-selector">
-    <button class="team-btn active" data-team="1" onclick="setTeam(1)">Team 1: Alpha</button>
-    <button class="team-btn" data-team="2" onclick="setTeam(2)">Team 2: RB Hedge</button>
-    <button class="team-btn" data-team="3" onclick="setTeam(3)">Team 3: McLaren</button>
-</div>
+<main>
+    <div class="status-bar">
+        <span class="team-indicator" id="team-label">Team 1: The Safe Build</span>
+        <button class="emergency-btn" onclick="triggerEmergency()">🚨 Emergency</button>
+    </div>
 
-<div class="container">
-    <div id="wizard-container">
+    <div id="wizard-content">
         </div>
-</div>
+</main>
 
 <script>
-    let currentTeam = 1;
-    let currentStep = 0;
-
-    // Team Configurations & Logic Trees
-    const teamData = {
+    // --- STRATEGY DATABASE ---
+    const strategies = {
         1: {
             name: "Alpha (Merc/Ferrari)",
             color: "#e10600",
-            questions: [
-                { id: 'q1', text: "Is it a Sprint Weekend?", sub: "Shanghai, Miami, Austin, Qatar", yes: "limitless", no: "next" },
-                { id: 'q2', text: "Is Rain/Severe Weather forecast?", sub: "High chance of chaos/random grid", yes: "autopilot", no: "next" },
-                { id: 'q3', text: "Is it a Street Circuit?", sub: "Monaco, Baku, Singapore (High crash risk)", yes: "nonegative", no: "next" },
-                { id: 'q4', text: "Is it the Spanish or British GP?", sub: "Major Upgrade Cycles", yes: "wildcard", no: "next" },
-                { id: 'q5', text: "Is it a Power Track?", sub: "Monza, Spa, Vegas (Long Straights)", yes: "3x_verstappen", no: "standard" }
-            ]
+            startNode: 'q1',
+            nodes: {
+                'q1': { q: "Is it a Sprint Weekend?", c: "Shanghai, Miami, Austin, Qatar, etc.", y: 'limitless', n: 'q2' },
+                'q2': { q: "Is severe weather forecast?", c: "Heavy rain creates high variance/crash risk.", y: 'autopilot', n: 'q3' },
+                'q3': { q: "Is this a 'Street Circuit'?", c: "Monaco, Baku, Singapore (High attrition).", y: 'nonegative', n: 'q4' },
+                'q4': { q: "Is it the Spanish or British GP?", c: "Major upgrade deadline. Pecking order shift.", y: 'wildcard', n: 'q5' },
+                'q5': { q: "Is it Monza or Spa?", c: "Pure power tracks (Long straights).", y: '3x_verstappen', n: 'standard' }
+            }
         },
         2: {
             name: "Red Bull Hedge",
             color: "#061D42",
-            questions: [
-                { id: 'q1', text: "Is it a Sprint Weekend?", sub: "More points available for Max/Hadjar", yes: "limitless_rb", no: "next" },
-                { id: 'q2', text: "Is it a Pure Power Track?", sub: "Monza, Spa (Where RB22 straight-line speed kills)", yes: "3x_rb", no: "next" },
-                { id: 'q3', text: "Is it a High Downforce Track?", sub: "Monaco, Hungary (RB22 weakness)", yes: "autopilot", no: "next" },
-                { id: 'q4', text: "Did Max Qualify Poorly (P10+)?", sub: "Is recovery likely but risky?", yes: "finalfix", no: "standard_rb" }
-            ]
+            startNode: 'q1',
+            nodes: {
+                'q1': { q: "Is it a Sprint Weekend?", c: "Max points available. 4 Scoring events.", y: 'limitless_rb', n: 'q2' },
+                'q2': { q: "Is it Monza, Spa, or Vegas?", c: "The 'Sandbag' Theory: RB22 energy deployment is king here.", y: '3x_max', n: 'q3' },
+                'q3': { q: "Is it Monaco or Hungary?", c: "High Downforce. RB22 weakness. Crash risk.", y: 'autopilot', n: 'q4' },
+                'q4': { q: "Did Max Qualify P10 or lower?", c: "Recovery drive is risky.", y: 'finalfix_max', n: 'standard_max' }
+            }
         },
         3: {
             name: "McLaren Loyalty",
-            color: "#FF8700",
-            questions: [
-                { id: 'q1', text: "Is it a Sprint Weekend?", sub: "Maximize Lando/Oscar points", yes: "limitless", no: "next" },
-                { id: 'q2', text: "Is it a High Tire-Degradation Track?", sub: "Silverstone, Barcelona, Suzuka", yes: "3x_mcl", no: "next" },
-                { id: 'q3', text: "Are you running risky mid-fielders?", sub: "Gasly/Ocon in your lineup?", yes: "nonegative", no: "standard_mcl" }
-            ]
+            color: "#ff8700",
+            startNode: 'q1',
+            nodes: {
+                'q1': { q: "Is it a Sprint Weekend?", c: "Maximize Lando/Oscar output.", y: 'limitless', n: 'q2' },
+                'q2': { q: "Is it Silverstone, Spain, or Suzuka?", c: "High Tire Deg. MCL40 excels in race trim here.", y: '3x_lando', n: 'q3' },
+                'q3': { q: "Did Ferrari/Merc look unreliable in Practice?", c: "Engine failures or DNF risks?", y: 'wildcard', n: 'standard_mcl' }
+            }
         }
     };
 
     const results = {
-        'limitless': { icon: '♾️', title: 'Limitless Chip', desc: 'Unlimited budget. Build the "God Squad" (Top 5 Drivers + Top 2 Teams).', reason: 'Sprint weekends offer 4 scoring events. Maximizes raw output.' },
-        'limitless_rb': { icon: '♾️', title: 'Limitless (RB Focus)', desc: 'Unlimited budget. Ensure Max & Hadjar are locked.', reason: 'Sprint weekend. Even with unlimited budget, prioritize the RB22 speed advantage.' },
-        'autopilot': { icon: '🤖', title: 'Autopilot', desc: 'Let the game pick your captain.', reason: 'Conditions are unpredictable. Don\'t risk a 2x on a DNF.' },
-        'nonegative': { icon: '🛡️', title: 'No Negative', desc: 'Protect against DNFs.', reason: 'High attrition track. One crash could ruin your week.' },
-        'wildcard': { icon: '🃏', title: 'Wildcard', desc: 'Rebuild your team permanently.', reason: 'Post-upgrade cycle. The pecking order has changed.' },
-        '3x_verstappen': { icon: '🚀', title: '3x Boost: Verstappen', desc: 'Triple points on Max.', reason: 'Power track rewards RB22 energy deployment.' },
-        '3x_rb': { icon: '🚀', title: '3x Boost: Max', desc: 'Triple points on Max.', reason: 'This is the track where the "Sandbagging" theory pays off. Massive straight line speed.' },
-        '3x_mcl': { icon: '🧡', title: '3x Boost: Lando', desc: 'Triple points on Norris.', reason: 'MCL40 excels in tire wear. He will dominate the late race stages here.' },
-        'finalfix': { icon: '🔧', title: 'Final Fix', desc: 'Swap Max for a front-row starter.', reason: 'Max started too far back. Secure points with a safer premium driver.' },
-        'standard': { icon: '✅', title: '2x Boost: Hadjar', desc: 'Save your chips.', reason: 'Standard week. Hadjar is the safest value play in the RB22.' },
-        'standard_rb': { icon: '🏎️', title: '2x Boost: Max', desc: 'Save chips. Captain Max.', reason: 'You are hedging on Red Bull dominance. Trust the RB22.' },
-        'standard_mcl': { icon: '🧡', title: '2x Boost: Piastri/Norris', desc: 'Save chips. Captain McLaren.', reason: 'Consistent points finish expected.' }
+        'limitless': { 
+            title: "Limitless Chip", icon: "♾️", 
+            desc: "Ignore the budget cap.", 
+            logic: "Sprint weekends have 33% more points. Buy the 'God Squad' (Verstappen, Norris, Leclerc, Merc, Ferrari) for one week only." 
+        },
+        'limitless_rb': { 
+            title: "Limitless (RB Focus)", icon: "♾️", 
+            desc: "Unlimited Budget + Max Captain.", 
+            logic: "Even with unlimited cash, ensure Max is your 2x. Build the rest with Ferrari/Merc assets." 
+        },
+        'autopilot': { 
+            title: "Autopilot Chip", icon: "🤖", 
+            desc: "Do not pick a captain manually.", 
+            logic: "Rain/Chaos means your chosen captain might DNF. Autopilot guarantees the 2x goes to the survivor." 
+        },
+        'nonegative': { 
+            title: "No Negative Chip", icon: "🛡️", 
+            desc: "Protect against DNFs.", 
+            logic: "Street circuits (Monaco/Baku) have -20pt penalties lurking everywhere. Use this if running risky midfielders." 
+        },
+        'wildcard': { 
+            title: "Wildcard Chip", icon: "🃏", 
+            desc: "Total Team Reset.", 
+            logic: "The upgrades have landed. The old hierarchy is dead. Permanently restructure your team to the new fastest car." 
+        },
+        '3x_verstappen': { 
+            title: "3x Boost: Max", icon: "🚀", 
+            desc: "Triple Points on Verstappen.", 
+            logic: "If you own him, play it here. If not, save the chip. This track rewards the RB22's straight-line speed." 
+        },
+        '3x_max': { 
+            title: "3x Boost: Max", icon: "🚀", 
+            desc: "Triple Points on Verstappen.", 
+            logic: "This is the moment. The 1.0s/lap advantage is real on these straights. Maximum attack." 
+        },
+        '3x_lando': { 
+            title: "3x Boost: Lando", icon: "🧡", 
+            desc: "Triple Points on Norris.", 
+            logic: "High tire degradation suits the McLaren. He will catch the Ferraris in the final stint." 
+        },
+        'finalfix_max': { 
+            title: "Final Fix Chip", icon: "🔧", 
+            desc: "Swap Max for P1 Starter.", 
+            logic: "Max is starting too far back. Don't risk the recovery. Swap him for Russell/Leclerc (whoever is on Pole)." 
+        },
+        'standard': { 
+            title: "2x Boost: Hadjar", icon: "✅", 
+            desc: "Save Chips. Trust the Process.", 
+            logic: "Isack Hadjar is your mathematical MVP. He is in a Red Bull but priced like a rookie." 
+        },
+        'standard_max': { 
+            title: "2x Boost: Verstappen", icon: "🦁", 
+            desc: "Save Chips. Force Max.", 
+            logic: "You are paying for the World Champion. You captain the World Champion. Every week." 
+        },
+        'standard_mcl': { 
+            title: "2x Boost: Norris/Piastri", icon: "🧡", 
+            desc: "Save Chips.", 
+            logic: "Pick whichever McLaren driver qualified higher. They are consistent points machines." 
+        }
     };
 
-    function init() {
-        setTeam(1);
-    }
+    // --- APP LOGIC ---
+    let currentTeam = 1;
 
     function setTeam(id) {
         currentTeam = id;
-        currentStep = 0;
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector(`.nav-btn[data-team="${id}"]`).classList.add('active');
         
-        // Update UI Tabs
-        document.querySelectorAll('.team-btn').forEach(btn => {
-            btn.classList.remove('active');
-            if(parseInt(btn.dataset.team) === id) btn.classList.add('active');
-        });
-
-        renderStep();
+        // Update Root Color for accent
+        document.documentElement.style.setProperty('--accent', strategies[id].color);
+        document.getElementById('team-label').innerText = `Active Strategy: ${strategies[id].name}`;
+        
+        loadQuestion(strategies[id].startNode);
     }
 
-    function renderStep() {
-        const container = document.getElementById('wizard-container');
-        const team = teamData[currentTeam];
-        
-        if (currentStep < team.questions.length) {
-            const q = team.questions[currentStep];
-            container.innerHTML = `
-                <div class="wizard-step active">
-                    <div class="question-card" style="border-top: 4px solid ${team.color}">
-                        <div class="team-badge">${team.name} Strategy</div>
-                        <div class="question-text">${q.text}</div>
-                        <div class="question-sub">${q.sub}</div>
-                        <div class="btn-grid">
-                            <button class="btn btn-yes" onclick="handleAnswer('${q.yes}')">YES</button>
-                            <button class="btn btn-no" onclick="handleAnswer('${q.no}')">NO</button>
-                        </div>
-                    </div>
+    function loadQuestion(nodeId) {
+        const data = strategies[currentTeam].nodes[nodeId];
+        const html = `
+            <div class="card">
+                <div class="card-header">Decision Node: ${nodeId.toUpperCase()}</div>
+                <div class="question">${data.q}</div>
+                <div class="context">${data.c}</div>
+                <div class="actions">
+                    <button class="btn btn-yes" onclick="handleResponse('${data.y}')">YES</button>
+                    <button class="btn btn-no" onclick="handleResponse('${data.n}')">NO</button>
                 </div>
-            `;
-        } else {
-            // Fallback if no logic met
-            showResult(currentTeam === 2 ? 'standard_rb' : (currentTeam === 3 ? 'standard_mcl' : 'standard'));
-        }
+            </div>
+        `;
+        document.getElementById('wizard-content').innerHTML = html;
     }
 
-    function handleAnswer(outcome) {
-        if (outcome === 'next') {
-            currentStep++;
-            renderStep();
+    function handleResponse(target) {
+        // If target is a question key (q1, q2...)
+        if (target.startsWith('q')) {
+            loadQuestion(target);
         } else {
-            showResult(outcome);
+            // It's a result
+            showResult(target);
         }
     }
 
     function showResult(key) {
-        const container = document.getElementById('wizard-container');
         const res = results[key];
-        const team = teamData[currentTeam];
+        const html = `
+            <div class="card" style="border-top: 5px solid var(--success)">
+                <span class="result-icon">${res.icon}</span>
+                <div class="result-title">${res.title}</div>
+                <div class="result-desc">${res.desc}</div>
+                <div class="strategy-box">
+                    <span class="strategy-label">Strategic Reasoning</span>
+                    <span class="strategy-text">${res.logic}</span>
+                </div>
+                <div class="reset-link" onclick="setTeam(${currentTeam})">Restart Analysis</div>
+            </div>
+        `;
+        document.getElementById('wizard-content').innerHTML = html;
+    }
 
-        container.innerHTML = `
-            <div class="wizard-step active">
-                <div class="result-card">
-                    <span class="result-icon">${res.icon}</span>
-                    <div class="result-name">${res.title}</div>
-                    <div class="result-desc">${res.desc}</div>
-                    <div class="result-logic">
-                        <strong>Why?</strong> ${res.reason}
-                    </div>
-                    <button class="restart-btn" onclick="setTeam(${currentTeam})">Start Over</button>
+    function triggerEmergency() {
+        const html = `
+            <div class="card" style="border-color: var(--alert)">
+                <div class="card-header" style="color: var(--alert)">⚠️ EMERGENCY PROTOCOL</div>
+                <div class="question">Did your Premium Driver crash in Q3?</div>
+                <div class="context">Only use this if your main points scorer (Max/Charles) is starting P15 or lower due to a crash.</div>
+                <div class="actions">
+                    <button class="btn" style="background:var(--alert); color:#fff" onclick="showResult('finalfix_max')">YES, THEY CRASHED</button>
+                    <button class="btn btn-no" onclick="setTeam(${currentTeam})">FALSE ALARM</button>
                 </div>
             </div>
         `;
+        document.getElementById('wizard-content').innerHTML = html;
     }
 
-    // Start
-    init();
-</script>
+    // Init
+    setTeam(1);
 
+</script>
 </body>
 </html>
