@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>2026 F1 Command Center</title>
+    <title>F1 Command Center</title>
     <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -185,8 +185,8 @@
     <div class="app-title">F1 2026 StratOS</div>
     <div class="team-nav">
         <button class="nav-btn active" data-team="1" onclick="setTeam(1)">Alpha<br><span style="font-size:0.6rem; opacity:0.7">MER / FER</span></button>
-        <button class="nav-btn" data-team="2" onclick="setTeam(2)">RB Hedge<br><span style="font-size:0.6rem; opacity:0.7">VER / RB</span></button>
-        <button class="nav-btn" data-team="3" onclick="setTeam(3)">McLaren<br><span style="font-size:0.6rem; opacity:0.7">NOR / MCL</span></button>
+        <button class="nav-btn" data-team="2" onclick="setTeam(2)">RB Hedge<br><span style="font-size:0.6rem; opacity:0.7">VER / HAAS</span></button>
+        <button class="nav-btn" data-team="3" onclick="setTeam(3)">McLaren<br><span style="font-size:0.6rem; opacity:0.7">NOR / HAAS</span></button>
     </div>
 </header>
 
@@ -231,9 +231,9 @@
             color: "#ff8700",
             startNode: 'q1',
             nodes: {
-                'q1': { q: "Is it a Sprint Weekend?", c: "Maximize Lando/Oscar output.", y: 'limitless', n: 'q2' },
+                'q1': { q: "Is it a Sprint Weekend?", c: "Maximize Lando points.", y: 'limitless', n: 'q2' },
                 'q2': { q: "Is it Silverstone, Spain, or Suzuka?", c: "High Tire Deg. MCL40 excels in race trim here.", y: '3x_lando', n: 'q3' },
-                'q3': { q: "Did Ferrari/Merc look unreliable in Practice?", c: "Engine failures or DNF risks?", y: 'wildcard', n: 'standard_mcl' }
+                'q3': { q: "Is McLaren's reliability shaky?", c: "Engine failures or DNF risks in practice?", y: 'wildcard', n: 'standard_mcl' }
             }
         }
     };
@@ -295,9 +295,9 @@
             logic: "You are paying for the World Champion. You captain the World Champion. Every week." 
         },
         'standard_mcl': { 
-            title: "2x Boost: Norris/Piastri", icon: "🧡", 
-            desc: "Save Chips.", 
-            logic: "Pick whichever McLaren driver qualified higher. They are consistent points machines." 
+            title: "2x Boost: Lando Norris", icon: "🧡", 
+            desc: "Save Chips. Captain Lando.", 
+            logic: "The MCL40 is a race-day car. Lando will deliver points even if he qualifies P4." 
         }
     };
 
@@ -364,7 +364,7 @@
             <div class="card" style="border-color: var(--alert)">
                 <div class="card-header" style="color: var(--alert)">⚠️ EMERGENCY PROTOCOL</div>
                 <div class="question">Did your Premium Driver crash in Q3?</div>
-                <div class="context">Only use this if your main points scorer (Max/Charles) is starting P15 or lower due to a crash.</div>
+                <div class="context">Only use this if your main points scorer (Max/Lando) is starting P15 or lower due to a crash.</div>
                 <div class="actions">
                     <button class="btn" style="background:var(--alert); color:#fff" onclick="showResult('finalfix_max')">YES, THEY CRASHED</button>
                     <button class="btn btn-no" onclick="setTeam(${currentTeam})">FALSE ALARM</button>
