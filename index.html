@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 F1 Fantasy Strategist</title>
+    <style>
+        :root {
+            --f1-red: #e10600;
+            --f1-dark: #15151e;
+            --f1-card: #1f1f27;
+            --text-light: #f0f0f0;
+            --text-dim: #a0a0a0;
+            --success: #2ecc71;
+            --warning: #f1c40f;
+        }
+
+        body {
+            font-family: 'Titillium Web', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--f1-dark);
+            color: var(--text-light);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--f1-red);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 900;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* --- MODE SWITCHER --- */
+        .mode-toggle {
+            display: flex;
+            background: var(--f1-card);
+            border-radius: 8px;
+            padding: 5px;
+            margin-bottom: 25px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            padding: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .mode-btn.active {
+            background-color: var(--f1-red);
+            color: white;
+        }
+
+        /* --- WIZARD STYLES --- */
+        .wizard-step {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .wizard-step.active {
+            display: block;
+        }
+
+        .question-card {
+            background-color: var(--f1-card);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid #333;
+            text-align: center;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-yes { background-color: var(--f1-red); color: white; }
+        .btn-no { background-color: #383842; color: white; }
+        .btn-reset { 
+            background-color: transparent; 
+            border: 1px solid var(--text-dim); 
+            color: var(--text-dim);
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        /* --- RESULT CARD --- */
+        .result-card {
+            background: linear-gradient(145deg, #1f1f27, #25252e);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            border-top: 4px solid var(--success);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .result-icon { font-size: 3rem; margin-bottom: 15px; display: block; }
+        .result-title { font-size: 0.9rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 1px; }
+        .result-name { font-size: 2rem; font-weight: 900; margin: 10px 0; color: var(--f1-red); }
+        .result-desc { font-size: 1.1rem; line-height: 1.5; color: #ddd; margin-bottom: 20px; }
+        .result-note { 
+            background: rgba(255, 193, 7, 0.1); 
+            border-left: 3px solid var(--warning); 
+            padding: 10px; 
+            text-align: left;
+            font-size: 0.9rem;
+            color: #e0e0e0;
+        }
+
+        /* --- REFERENCE LIST --- */
+        .chip-list { display: none; }
+        .chip-list.active { display: block; }
+
+        .chip-card {
+            background-color: var(--f1-card);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--f1-red);
+        }
+
+        .chip-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .chip-name { font-weight: 800; font-size: 1.2rem; }
+        .chip-tag { 
+            background: #333; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+        }
+
+        .chip-detail { font-size: 0.95rem; color: #ccc; margin-bottom: 8px; }
+        .chip-detail strong { color: white; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>2026 F1 Strategy</h1>
+</header>
+
+<div class="container">
+    
+    <div class="mode-toggle">
+        <button class="mode-btn active" onclick="switchMode('wizard')">Decision Tool</button>
+        <button class="mode-btn" onclick="switchMode('reference')">All Chips</button>
+    </div>
+
+    <div id="wizard-view">
+        
+        <div class="wizard-step active" id="step-0">
+            <div class="question-card">
+                <div style="color: var(--f1-red); font-size: 3rem; margin-bottom:10px;">⚠️</div>
+                <div class="question-text">Did your premium driver just crash in Q3?</div>
+                <div class="btn-grid">
+                    <button class="btn btn-yes" onclick="showResult('final-fix')">YES</button>
+                    <button class="btn btn-no" onclick="nextStep(1)">NO</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="wizard-step" id="step-1">
+            <div class="question-card">
+                <div class="question-text">Is this a <strong>Sprint Weekend</strong>?</div>
+                <p style="color:var(--text-dim); font-size:0.9rem;">(Shanghai, Miami, Austin, Qatar, etc.)</p>
+                <div class="btn-grid">
+                    <button class="btn btn-yes" onclick="showResult('limitless')">YES</button>
+                    <button class="btn btn-no" onclick="nextStep(2)">NO</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="wizard-step" id="step-2">
+            <div class="question-card">
+                <div class="question-text">Is <strong>Severe Weather / Rain</strong> forecast for Quali or Race?</div>
+                <div class="btn-grid">
+                    <button class="btn btn-yes" onclick="showResult('autopilot')">YES</button>
+                    <button class="btn btn-no" onclick="nextStep(3)">NO</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="wizard-step" id="step-3">
+            <div class="question-card">
+                <div class="question-text">Is this a <strong>High-Attrition Street Circuit</strong>?</div>
+                <p style="color:var(--text-dim); font-size:0.9rem;">(Monaco, Baku, Singapore)</p>
+                <div class="btn-grid">
+                    <button class="btn btn-yes" onclick="showResult('no-negative')">YES</button>
+                    <button class="btn btn-no" onclick="nextStep(4)">NO</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="wizard-step" id="step-4">
+            <div class="question-card">
+                <div class="question-text">Is this the <strong>Spanish</strong> or <strong>British Grand Prix</strong>?</div>
+                <p style="color:var(--text-dim); font-size:0.9rem;">(Major Upgrade Weekends)</p>
+                <div class="btn-grid">
+                    <button class="btn btn-yes" onclick="showResult('wildcard')">YES</button>
+                    <button class="btn btn-no" onclick="nextStep(5)">NO</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="wizard-step" id="step-5">
+            <div class="question-card">
+                <div class="question-text">Is this a <strong>Power Track</strong> with long straights?</div>
+                <p style="color:var(--text-dim); font-size:0.9rem;">(Monza, Spa, Las Vegas)</p>
+                <div class="btn-grid">
+                    <button class="btn btn-yes" onclick="showResult('3x-boost')">YES</button>
+                    <button class="btn btn-no" onclick="showResult('standard')">NO</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="wizard-step" id="result-view">
+            <div class="result-card">
+                <span class="result-icon" id="res-icon">🏎️</span>
+                <div class="result-title">Recommended Strategy</div>
+                <div class="result-name" id="res-name">Standard</div>
+                <div class="result-desc" id="res-desc">...</div>
+                <div class="result-note" id="res-note">...</div>
+                <button class="btn btn-reset" onclick="resetWizard()">Start Over</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="reference-view" class="chip-list">
+        
+        <div class="chip-card">
+            <div class="chip-header">
+                <span class="chip-name">Limitless</span>
+                <span class="chip-tag">Sprint Only</span>
+            </div>
+            <div class="chip-detail"><strong>Trigger:</strong> Sprint Weekends (China, Miami, Austin, Qatar).</div>
+            <div class="chip-detail"><strong>Action:</strong> Remove budget cap. Pick top 5 most expensive drivers (Verstappen, Norris, etc.) & top 2 teams.</div>
+        </div>
+
+        <div class="chip-card">
+            <div class="chip-header">
+                <span class="chip-name">Wildcard</span>
+                <span class="chip-tag">Reset</span>
+            </div>
+            <div class="chip-detail"><strong>Trigger:</strong> Spanish or British GP (Upgrade cycles).</div>
+            <div class="chip-detail"><strong>Action:</strong> Unlimited free transfers. Permanently restructure team to match new car performance.</div>
+        </div>
+
+        <div class="chip-card">
+            <div class="chip-header">
+                <span class="chip-name">Autopilot</span>
+                <span class="chip-tag">Weather</span>
+            </div>
+            <div class="chip-detail"><strong>Trigger:</strong> Heavy Rain / High Variance.</div>
+            <div class="chip-detail"><strong>Action:</strong> Auto-assigns 2x boost to highest scorer. Prevents losing points if your captain crashes in rain.</div>
+        </div>
+
+        <div class="chip-card">
+            <div class="chip-header">
+                <span class="chip-name">No Negative</span>
+                <span class="chip-tag">Survival</span>
+            </div>
+            <div class="chip-detail"><strong>Trigger:</strong> Monaco, Baku, Singapore.</div>
+            <div class="chip-detail"><strong>Action:</strong> Negates DNF penalties (-20 pts). Use on tracks with high crash probability.</div>
+        </div>
+
+        <div class="chip-card">
+            <div class="chip-header">
+                <span class="chip-name">3x Boost</span>
+                <span class="chip-tag">Power</span>
+            </div>
+            <div class="chip-detail"><strong>Trigger:</strong> Monza, Spa, Vegas.</div>
+            <div class="chip-detail"><strong>Action:</strong> Use on Max Verstappen or Charles Leclerc. Optimizes points on tracks rewarding energy efficiency.</div>
+        </div>
+
+        <div class="chip-card">
+            <div class="chip-header">
+                <span class="chip-name">Final Fix</span>
+                <span class="chip-tag">Emergency</span>
+            </div>
+            <div class="chip-detail"><strong>Trigger:</strong> Premium driver crashes in Q3.</div>
+            <div class="chip-detail"><strong>Action:</strong> Swap crashed driver for a P1-P4 starter between Quali and Race.</div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    const strategies = {
+        'final-fix': {
+            icon: '🚑',
+            name: 'Final Fix Chip',
+            desc: 'Your premium driver crashed in Qualifying. Use this chip to swap them for a healthy P1-P4 starter before the race begins.',
+            note: 'Do not use for minor poor performances (e.g., P6). Only use for catastrophic P20/Pit Lane starts.'
+        },
+        'limitless': {
+            icon: '♾️',
+            name: 'Limitless Chip',
+            desc: 'It is a Sprint Weekend. Activate Limitless to ignore the budget cap.',
+            note: 'Build the "God Squad": Max out your budget with the 5 most expensive drivers and 2 most expensive teams.'
+        },
+        'autopilot': {
+            icon: '🤖',
+            name: 'Autopilot Chip',
+            desc: 'Rain creates chaos. Do not manually pick a captain. Let Autopilot assign the 2x boost to whoever survives.',
+            note: 'This guarantees you do not get -20 points if your chosen captain DNFs in the wet.'
+        },
+        'no-negative': {
+            icon: '🛡️',
+            name: 'No Negative Chip',
+            desc: 'Street circuits like Monaco and Baku have high crash rates. This chip protects you from negative DNF scores.',
+            note: 'Best used when you have aggressive midfield drivers in your team.'
+        },
+        'wildcard': {
+            icon: '🃏',
+            name: 'Wildcard Chip',
+            desc: 'Teams have brought major upgrades (Spain/Silverstone). The pecking order has changed.',
+            note: 'Use this to permanently rebuild your team structure for free to match the new fastest cars.'
+        },
+        '3x-boost': {
+            icon: '🚀',
+            name: '3x Extra DRS',
+            desc: 'This track rewards pure power and efficiency. Apply to Verstappen or Leclerc.',
+            note: '2026 regs reward energy deployment on long straights (Monza, Spa).'
+        },
+        'standard': {
+            icon: '✅',
+            name: 'Standard 2x Boost',
+            desc: 'No special conditions detected. Save your chips.',
+            note: '<strong>Captain:</strong> Isack Hadjar (Red Bull). He is your safest Tier B asset in a top-tier car.'
+        }
+    };
+
+    function switchMode(mode) {
+        document.getElementById('wizard-view').style.display = mode === 'wizard' ? 'block' : 'none';
+        document.getElementById('reference-view').className = mode === 'reference' ? 'chip-list active' : 'chip-list';
+        
+        document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    function nextStep(stepNum) {
+        document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
+        document.getElementById('step-' + stepNum).classList.add('active');
+    }
+
+    function showResult(key) {
+        const data = strategies[key];
+        document.getElementById('res-icon').textContent = data.icon;
+        document.getElementById('res-name').textContent = data.name;
+        document.getElementById('res-desc').textContent = data.desc;
+        document.getElementById('res-note').innerHTML = data.note;
+        
+        document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
+        document.getElementById('result-view').classList.add('active');
+    }
+
+    function resetWizard() {
+        document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
+        document.getElementById('step-0').classList.add('active');
+    }
+</script>
+
+</body>
+</html>
